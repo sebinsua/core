@@ -1,0 +1,17 @@
+{
+    "startup_app": {
+        "name": "OpenfinPOC",
+        "description": "OpenFin POC",
+        "url": "http://redux-form.com/6.7.0/examples/initializeFromState",
+        "uuid": "OpenfinPOC-hla8ix6e0y2iwwjlxkojkbj4i",
+        "autoShow": true,
+        "accelerator": {
+            "devtools": true
+        }
+    },
+    "runtime": {
+        "arguments": "",
+        "version": "7.53.21.6"
+    },
+    "shortcut": {}
+}

@@ -29,7 +29,7 @@ const asar = require('asar');
 const nativeBuilder = require('electron-rebuild');
 const wrench = require('wrench');
 
-const dependencies = Object.keys(require('./package.json').dependencies).map(dep => `${dep}/**`);
+const dependencies = ['*/**']; // Object.keys(require('./package.json').dependencies).map(() => `*/**`);
 const srcFiles = ['src/**/*.js', 'index.js', 'Gruntfile.js'];
 
 //optional dependencies that we ship.

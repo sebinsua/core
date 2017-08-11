@@ -54,6 +54,8 @@ import * as log from '../log';
 let subscriptionManager = new require('../subscription_manager.js').SubscriptionManager();
 import route from '../../common/route';
 
+import installExtension, { REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } from 'electron-devtools-installer';
+
 // locals
 const TRAY_ICON_KEY = 'tray-icon-events';
 let runtimeIsClosing = false;
@@ -111,6 +113,17 @@ electronApp.on('ready', function() {
         }
     });
 
+    console.log('devtools installed as: ', BrowserWindow.getDevToolsExtensions());
+    console.log(process.versions);
+
+    process.versions.electron = '1.2.6'; // process.versions.openfin;
+    return Promise.all([
+        installExtension(REACT_DEVELOPER_TOOLS),
+        installExtension(REDUX_DEVTOOLS)
+    ]).then(
+        (installs) => console.log(`Installed: ${installs}`),
+        (error) => console.error(`Failure installing: ${error}`)
+    );
 });
 
 Application.create = function(opts, configUrl = '', parentIdentity = {}) {
@@ -499,34 +512,34 @@ Application.run = function(identity, configUrl = '') {
         rvmBus.registerLicenseInfo({ data: genLicensePayload() }, sourceUrl);
     };
     const sendAppsEventsToRVMListener = (appEvent) => {
-            if (!sourceUrl) {
-                return; // Most likely an adapter, RVM can't do anything with what it didn't load(determined by sourceUrl) so ignore
-            }
-            let type = appEvent.type,
-                rvmPayload = {
-                    topic: 'application-event',
-                    type,
-                    sourceUrl
-                };
+        if (!sourceUrl) {
+            return; // Most likely an adapter, RVM can't do anything with what it didn't load(determined by sourceUrl) so ignore
+        }
+        let type = appEvent.type,
+            rvmPayload = {
+                topic: 'application-event',
+                type,
+                sourceUrl
+            };
 
-            if (type === 'ready' || type === 'run-requested') {
-                rvmPayload.hideSplashScreenSupported = true;
-            } else if (type === 'closed') {
+        if (type === 'ready' || type === 'run-requested') {
+            rvmPayload.hideSplashScreenSupported = true;
+        } else if (type === 'closed') {
 
-                // Don't send 'closed' event to RVM when app is restarting.
-                // This solves the problem of apps not being able to make API
-                // calls that rely on RVM and manifest URL
-                if (appState.isRestarting) {
-                    return;
-                }
-
-                rvmPayload.isClosing = coreState.shouldCloseRuntime([uuid]);
+            // Don't send 'closed' event to RVM when app is restarting.
+            // This solves the problem of apps not being able to make API
+            // calls that rely on RVM and manifest URL
+            if (appState.isRestarting) {
+                return;
             }
 
-            if (rvmBus) {
-                rvmBus.publish(rvmPayload);
-            }
-};
+            rvmPayload.isClosing = coreState.shouldCloseRuntime([uuid]);
+        }
+
+        if (rvmBus) {
+            rvmBus.publish(rvmPayload);
+        }
+    };
 
     // if the runtime is in offline mode, the RVM still expects the
     // startup-url/config for communication
